@@ -5,6 +5,7 @@
   padding: 10px 0;
 
   background-color: $topbar-background-color;
+  color: #fff;
   .topbar-wrapper {
     display: flex;
     align-items: center;
@@ -19,18 +20,29 @@
   }
 
   a {
-    font-size: 1.5em;
-    font-weight: bold;
+    font-size: 1rem;
+    font-weight: 600;
 
     display: flex;
     align-items: center;
-    flex: 1;
+    flex: 0 1 auto;
+    gap: 12px;
 
-    max-width: 300px;
+    max-width: none;
 
     text-decoration: none;
 
     @include type.text_headline($topbar-link-font-color);
+
+    .topbar-brand-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1rem;
+      color: #fff;
+      white-space: nowrap;
+      margin: 0;
+      padding: 0;
+    }
 
     span {
       margin: 0;
@@ -62,7 +74,7 @@
       width: 100%;
       max-width: 600px;
       margin: 0;
-      color: #f0f0f0;
+      color: #fff;
       span {
         font-size: 16px;
 
@@ -85,8 +97,9 @@
     }
 
     .download-url-button {
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1rem;
 
       padding: 4px 30px;
 
@@ -97,9 +110,97 @@
       @include type.text_headline($topbar-download-url-button-font-color);
     }
   }
+
+  .upload-yaml-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-left: auto;
+    justify-content: flex-end;
+
+    .upload-yaml-title,
+    .upload-yaml-file-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1rem;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .upload-yaml-file-name {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .upload-yaml-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .upload-yaml-browse-button,
+    .upload-yaml-load-button {
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1rem;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      background: #000;
+      padding: 7px 12px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .upload-yaml-load-button {
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
   @container swagger-ui (max-width: 550px) {
     .download-url-wrapper {
       width: 100%;
+    }
+
+    .upload-yaml-wrapper {
+      justify-content: flex-start;
+    }
+  }
+
+  .topbar-user-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: 12px;
+    color: #fff;
+
+    .sign-out {
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1rem;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .user-initials {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1rem;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.16);
     }
   }
 

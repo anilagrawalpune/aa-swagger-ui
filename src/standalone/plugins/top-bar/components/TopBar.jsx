@@ -3,6 +3,10 @@ import PropTypes from "prop-types"
 
 import {parseSearch, serializeSearch} from "core/utils"
 
+const BRAND_TITLE = "API Lifecycle UI"
+const LOCAL_SPEC_ALIAS = "dev-helpers/default_openapi_yaml/default_openapi_yaml_file.yaml"
+const LOCAL_SPEC_PATH = "/default_openapi_yaml/default_openapi_yaml_file.yaml"
+
 class TopBar extends React.Component {
 
   static propTypes = {
@@ -12,11 +16,82 @@ class TopBar extends React.Component {
 
   constructor(props, context) {
     super(props, context)
-    this.state = { url: props.specSelectors.url(), selectedIndex: 0 }
+    this.state = {
+      url: "",
+      selectedIndex: 0,
+      yamlFile: null,
+      yamlFileName: "No file selected"
+    }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    this.setState({ url: nextProps.specSelectors.url() })
+  onYamlFileChange = (e) => {
+    const file = e.target.files && e.target.files[0]
+
+    this.setState({
+      yamlFile: file || null,
+      yamlFileName: file ? file.name : "No file selected"
+    })
+  }
+
+  loadYamlFile = async (e) => {
+    e.preventDefault()
+
+    const { yamlFile } = this.state
+    if (!yamlFile) {
+      return
+    }
+
+    this.flushAuthData()
+    this.props.specActions.updateLoadingStatus("loading")
+
+    try {
+      const yamlText = await yamlFile.text()
+      this.props.specActions.updateUrl(`uploaded://${yamlFile.name}`)
+      this.props.specActions.updateSpec(yamlText)
+      this.props.specActions.updateLoadingStatus("success")
+    } catch (error) {
+      console.error(error)
+      this.props.specActions.updateLoadingStatus("failed")
+    }
+  }
+
+  normalizeSpecUrl = (url) => {
+    if (!url) {
+      return url
+    }
+
+    if (url === LOCAL_SPEC_ALIAS) {
+      return LOCAL_SPEC_PATH
+    }
+
+    if (url === `/${LOCAL_SPEC_ALIAS}`) {
+      return LOCAL_SPEC_PATH
+    }
+
+    if (url.startsWith("file:\\\\")) {
+      const normalizedPath = url.replace(/^file:\\\\+/, "").replace(/\\/g, "/").replace(/^\/+/, "")
+      if (!normalizedPath) {
+        return LOCAL_SPEC_PATH
+      }
+
+      const basePath = normalizedPath.endsWith("/") ? normalizedPath.slice(0, -1) : normalizedPath
+      if (basePath === "dev-helpers/default_openapi_yaml") {
+        return LOCAL_SPEC_PATH
+      }
+
+      if (basePath.startsWith("dev-helpers/")) {
+        return `/${basePath.slice("dev-helpers/".length)}`
+      }
+
+      return `/${basePath}`
+    }
+
+    if (url.startsWith("dev-helpers/")) {
+      const normalizedPath = url.replace(/^dev-helpers\//, "")
+      return `/${normalizedPath}`
+    }
+
+    return url
   }
 
   onUrlChange =(e)=> {
@@ -36,9 +111,11 @@ class TopBar extends React.Component {
   }
 
   loadSpec = (url) => {
+    const normalizedUrl = this.normalizeSpecUrl(url)
+
     this.flushAuthData()
-    this.props.specActions.updateUrl(url)
-    this.props.specActions.download(url)
+    this.props.specActions.updateUrl(normalizedUrl)
+    this.props.specActions.download(normalizedUrl)
   }
 
   onUrlSelect =(e)=> {
@@ -81,6 +158,10 @@ class TopBar extends React.Component {
   }
 
   componentDidMount() {
+    document.title = BRAND_TITLE
+
+    this.loadSpec(LOCAL_SPEC_PATH)
+
     const configs = this.props.getConfigs()
     const urls = configs.urls || []
 
@@ -98,8 +179,6 @@ class TopBar extends React.Component {
             }
         })
       }
-
-      this.loadSpec(urls[targetIndex].url)
     }
   }
 
@@ -113,7 +192,6 @@ class TopBar extends React.Component {
     const Button = getComponent("Button")
     const Link = getComponent("Link")
     const Logo = getComponent("Logo")
-    const DarkModeToggle = getComponent("DarkModeToggle")
 
     let isLoading = specSelectors.loadingStatus() === "loading"
     let isFailed = specSelectors.loadingStatus() === "failed"
@@ -161,11 +239,34 @@ class TopBar extends React.Component {
           <div className="topbar-wrapper">
             <Link>
               <Logo/>
+              <span className="topbar-brand-title">{BRAND_TITLE}</span>
             </Link>
             <form className="download-url-wrapper" onSubmit={formOnSubmit}>
               {control.map((el, i) => cloneElement(el, { key: i }))}
             </form>
-            <DarkModeToggle />
+            <form className="upload-yaml-wrapper" onSubmit={this.loadYamlFile}>
+              <span className="upload-yaml-title">Explore YAML</span>
+              <label className="upload-yaml-browse-button" htmlFor="upload-yaml-input">Browse</label>
+              <input
+                id="upload-yaml-input"
+                className="upload-yaml-input"
+                type="file"
+                accept=".yaml,.yml,application/yaml,text/yaml,text/x-yaml"
+                onChange={this.onYamlFileChange}
+              />
+              <span className="upload-yaml-file-name">{this.state.yamlFileName}</span>
+              <Button
+                className="upload-yaml-load-button"
+                onClick={this.loadYamlFile}
+                disabled={!this.state.yamlFile || isLoading}
+              >
+                Load YAML
+              </Button>
+            </form>
+            <div className="topbar-user-actions" aria-hidden="true">
+              <span className="sign-out">Sign Out</span>
+              <span className="user-initials">AA</span>
+            </div>
           </div>
         </div>
       </div>

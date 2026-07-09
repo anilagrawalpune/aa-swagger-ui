@@ -2,8 +2,8 @@
  * @prettier
  */
 import React from "react"
-import SwaggerUILogo from "../assets/logo_small.svg"
+import AWLogo from "core/assets/aw-logo-DAMth5pv.png"
 
-const Logo = () => <SwaggerUILogo height="40" />
+const Logo = () => <img src={AWLogo} alt="logo" height="40" />
 
 export default Logo

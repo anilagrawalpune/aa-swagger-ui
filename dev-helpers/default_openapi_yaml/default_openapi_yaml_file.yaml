@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: Doxville Embeddings API
+  description: Local default OpenAPI spec for Swagger UI development.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local Development
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      tags:
+        - Administrative
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+tags:
+  - name: Administrative
+    description: Administrative and maintenance operations
